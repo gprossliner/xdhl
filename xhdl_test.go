@@ -1,6 +1,7 @@
 package xhdl
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -121,4 +122,29 @@ func TestNoPanicsAreSwallowed2(t *testing.T) {
 			_ = s[0:1]
 		})
 	})
+}
+
+func TestGetContextValid(t *testing.T) {
+	err := Run(func(ctx Context) {
+
+		// add cancel value to context
+		ctx2, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		// and get the xhdl.Context from the WithCancel context
+		xctx2 := GetContext(ctx2)
+		assert.NotNil(t, xctx2)
+	})
+
+	assert.NoError(t, err)
+}
+
+func TestGetContextInValidShouldPanic(t *testing.T) {
+
+	assert.Panics(t, func() {
+
+		// this context is no valid xhdl context, so it should panic
+		GetContext(context.Background())
+	})
+
 }
