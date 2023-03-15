@@ -10,7 +10,7 @@ import (
 type Context interface {
 	context.Context
 	Throw(err error)
-	RunNested(f func(xctx Context)) error
+	RunNested(f func(ctx Context)) error
 }
 
 type xcontext struct {
@@ -30,7 +30,7 @@ func (xc *xcontext) Throw(err error) {
 
 // RunNested allows a inner function to perform it's own error handling.
 // This is just a shortcut to RunContext
-func (xc *xcontext) RunNested(f func(xctx Context)) error {
+func (xc *xcontext) RunNested(f func(ctx Context)) error {
 	return RunContext(xc.Context, f)
 }
 
@@ -54,7 +54,7 @@ func GetContext(ctx context.Context) Context {
 }
 
 // NewContext creates returns a func that can later be executed with xhdl
-func NewContext(f func(xctx Context)) func(ctx context.Context) error {
+func NewContext(f func(ctx Context)) func(ctx context.Context) error {
 
 	return func(ctx context.Context) (err error) {
 		xctx := &xcontext{}
@@ -76,15 +76,15 @@ func NewContext(f func(xctx Context)) func(ctx context.Context) error {
 	}
 }
 
-// Run executes f in a xhdl Context and returns err if xctx.Throw() has been
+// Run executes f in a xhdl Context and returns err if ctx.Throw() has been
 // call with a non-nil err.
-func Run(f func(xctx Context)) (err error) {
+func Run(f func(ctx Context)) (err error) {
 	return RunContext(context.Background(), f)
 }
 
-// RunContext executes f in a xhdl Context based on a parent context and returns err if xctx.Throw() has been
+// RunContext executes f in a xhdl Context based on a parent context and returns err if ctx.Throw() has been
 // call with a non-nil err.
-func RunContext(ctx context.Context, f func(xctx Context)) (err error) {
+func RunContext(ctx context.Context, f func(ctx Context)) (err error) {
 	instance := NewContext(f)
 	return instance(ctx)
 }

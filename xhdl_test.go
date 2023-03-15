@@ -12,7 +12,7 @@ func TestSimple(t *testing.T) {
 
 	res := ""
 
-	err := Run(func(xctx Context) {
+	err := Run(func(ctx Context) {
 		res = "done"
 	})
 
@@ -22,8 +22,8 @@ func TestSimple(t *testing.T) {
 
 func TestDirectErr(t *testing.T) {
 
-	err := Run(func(xctx Context) {
-		xctx.Throw(fmt.Errorf("error"))
+	err := Run(func(ctx Context) {
+		ctx.Throw(fmt.Errorf("error"))
 	})
 
 	assert.Error(t, err)
@@ -31,26 +31,26 @@ func TestDirectErr(t *testing.T) {
 
 func TestInDirectErr(t *testing.T) {
 
-	err := Run(func(xctx Context) {
-		ind1(xctx)
+	err := Run(func(ctx Context) {
+		ind1(ctx)
 	})
 
 	assert.Error(t, err)
 }
 
-func ind1(xctx Context) {
-	ind2(xctx)
+func ind1(ctx Context) {
+	ind2(ctx)
 }
 
-func ind2(xctx Context) {
-	xctx.Throw(fmt.Errorf("error"))
+func ind2(ctx Context) {
+	ctx.Throw(fmt.Errorf("error"))
 }
 
 func TestNested(t *testing.T) {
 
 	res := ""
-	err := Run(func(xctx Context) {
-		res = nested(xctx)
+	err := Run(func(ctx Context) {
+		res = nested(ctx)
 	})
 
 	assert.NoError(t, err)
@@ -58,9 +58,9 @@ func TestNested(t *testing.T) {
 
 }
 
-func nested(xctx Context) (res string) {
-	err := Run(func(xctx Context) {
-		ind1(xctx)
+func nested(ctx Context) (res string) {
+	err := Run(func(ctx Context) {
+		ind1(ctx)
 	})
 
 	return err.Error()
