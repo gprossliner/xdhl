@@ -1,10 +1,11 @@
-package xhdl
+package xhdl_test
 
 import (
 	"context"
 	"fmt"
 	"testing"
 
+	"github.com/gprossliner/xhdl"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,7 @@ func TestSimple(t *testing.T) {
 
 	res := ""
 
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		res = "done"
 	})
 
@@ -22,7 +23,7 @@ func TestSimple(t *testing.T) {
 
 func TestDirectErr(t *testing.T) {
 
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		ctx.Throw(fmt.Errorf("error"))
 	})
 
@@ -31,25 +32,25 @@ func TestDirectErr(t *testing.T) {
 
 func TestInDirectErr(t *testing.T) {
 
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		ind1(ctx)
 	})
 
 	assert.Error(t, err)
 }
 
-func ind1(ctx Context) {
+func ind1(ctx xhdl.Context) {
 	ind2(ctx)
 }
 
-func ind2(ctx Context) {
+func ind2(ctx xhdl.Context) {
 	ctx.Throw(fmt.Errorf("error"))
 }
 
 func TestNested(t *testing.T) {
 
 	res := ""
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		res = nested(ctx)
 	})
 
@@ -58,8 +59,8 @@ func TestNested(t *testing.T) {
 
 }
 
-func nested(ctx Context) (res string) {
-	err := Run(func(ctx Context) {
+func nested(ctx xhdl.Context) (res string) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		ind1(ctx)
 	})
 
@@ -68,7 +69,7 @@ func nested(ctx Context) (res string) {
 
 func TestCallExternalWithoutIf(t *testing.T) {
 
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		nerr := externalfn("")
 		ctx.Throw(nerr)
 	})
@@ -88,7 +89,7 @@ var deferCalled int
 
 func TestDeferedMethodsAreCalled(t *testing.T) {
 	deferCalled = 0
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 		f1(ctx)
 	})
 
@@ -96,20 +97,20 @@ func TestDeferedMethodsAreCalled(t *testing.T) {
 	assert.Equal(t, 1, deferCalled)
 }
 
-func f1(ctx Context) {
+func f1(ctx xhdl.Context) {
 	defer func() {
 		deferCalled = 1
 	}()
 	f2(ctx)
 }
 
-func f2(ctx Context) {
+func f2(ctx xhdl.Context) {
 	ctx.Throw(fmt.Errorf("Error!"))
 }
 
 func TestNoPanicsAreSwallowed(t *testing.T) {
 	assert.Panics(t, func() {
-		Run(func(ctx Context) {
+		xhdl.Run(func(ctx xhdl.Context) {
 			panic("ERROR")
 		})
 	})
@@ -117,7 +118,7 @@ func TestNoPanicsAreSwallowed(t *testing.T) {
 
 func TestNoPanicsAreSwallowed2(t *testing.T) {
 	assert.Panics(t, func() {
-		Run(func(ctx Context) {
+		xhdl.Run(func(ctx xhdl.Context) {
 			var s []string
 			_ = s[0:1]
 		})
@@ -125,14 +126,14 @@ func TestNoPanicsAreSwallowed2(t *testing.T) {
 }
 
 func TestGetContextValid(t *testing.T) {
-	err := Run(func(ctx Context) {
+	err := xhdl.Run(func(ctx xhdl.Context) {
 
 		// add cancel value to context
 		ctx2, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		// and get the xhdl.Context from the WithCancel context
-		xctx2 := GetContext(ctx2)
+		xctx2 := xhdl.GetContext(ctx2)
 		assert.NotNil(t, xctx2)
 	})
 
@@ -144,7 +145,7 @@ func TestGetContextInValidShouldPanic(t *testing.T) {
 	assert.Panics(t, func() {
 
 		// this context is no valid xhdl context, so it should panic
-		GetContext(context.Background())
+		xhdl.GetContext(context.Background())
 	})
 
 }
