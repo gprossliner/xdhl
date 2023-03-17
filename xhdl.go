@@ -11,6 +11,8 @@ type Context interface {
 	context.Context
 
 	// Throw causes the xhdl Context to abort, and to return the err to the caller.
+	// * Throw check for err != nil internally, and is a nop if err == nil
+	// * Even if the go compiler knows that err != nil, there may be a 'missing return' error, because it can't look into the interface func implementation
 	Throw(err error)
 
 	// RunNested allows a inner function to perform it's own error handling.
