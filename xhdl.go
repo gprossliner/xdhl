@@ -9,7 +9,12 @@ import (
 // to all func participating in the xhdl Context.
 type Context interface {
 	context.Context
+
+	// Throw causes the xhdl Context to abort, and to return the err to the caller.
 	Throw(err error)
+
+	// RunNested allows a inner function to perform it's own error handling.
+	// This is just a shortcut to RunContext
 	RunNested(f func(ctx Context)) error
 }
 
@@ -21,15 +26,12 @@ type wrappedErr struct {
 	err error
 }
 
-// Throw causes the xhdl Context to abort, and to return the err to the caller.
 func (xc *xcontext) Throw(err error) {
 	if err != nil {
 		panic(&wrappedErr{err})
 	}
 }
 
-// RunNested allows a inner function to perform it's own error handling.
-// This is just a shortcut to RunContext
 func (xc *xcontext) RunNested(f func(ctx Context)) error {
 	return RunContext(xc.Context, f)
 }
