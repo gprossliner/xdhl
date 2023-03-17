@@ -1,4 +1,6 @@
-# xhdl
+# xhdl 
+
+![example workflow](https://github.com/gprossliner/xhdl/actions/workflows/go.yml/badge.svg)
 
 xhdl stands for Exception Handling. It implements basic exception handling 
 for golang projects.
